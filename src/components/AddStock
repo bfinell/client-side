@@ -1,0 +1,88 @@
+import React,{Component} from 'react';
+
+
+class AddStock extends Component {
+ constructor(){
+    super();
+    this.state={
+    newStock:{},
+    quantity:0,
+    currency:"usd",
+    totValue:0
+    }
+
+ }
+
+
+
+getStocks() {
+    var symbol = this.refs.symbol.value;
+    var finalUrl = url +symbol+ apikey;
+    var price;
+
+    console.log(finalUrl);
+    fetch(finalUrl)
+        .then(function (response) {
+            console.log(response);
+            return response.json();
+        })
+        .then( (data) => {
+                if ('Error Message' in data) {
+                    alert('Stock not found')
+                    return
+                }
+                price = data["Global Quote"]["05. price"];
+                console.log(price)
+                this.setState({newStocks:{
+                            id:uuid.v4(),
+                            symbol:this.refs.symbol.value,
+                            quantity:this.refs.quantity.value,
+                            price:price,
+                            currency: '$',
+                            totValue:this.price*this.quantity,
+                        }},
+                    function() {
+                        this.state.push(this.state.newStocks);
+
+                    }
+                );
+
+            }
+        )
+    this.updateStocks(symbol);
+}
+updateStocks = (symbol) => {
+    var quantity = this.refs.quantity.value;
+    let stocks =this.state.stocks;
+    let exists = false;
+    stocks.forEach((stock,index)=> {
+        if (stock.symbol === symbol){
+            exists = true;
+            //    stocks[index].price = price
+            stocks[index].quantity += quantity
+            stocks[index].totValue = stocks[index].quantity*stocks.price
+            this.setState(() => ({
+                stocks: stocks
+            }))
+        }
+
+    })
+    if (!exists) {
+        this.setState(prevState => ({
+            stocks: [prevState.stocks, {
+                symbol: symbol,
+                quantity: quantity,
+                totValue: quantity * stocks.price
+            }]
+        }))
+    }
+    //uppdate value
+    let totValue = this.returnNewPortfolio(this.state.stocks)
+    this.setState({
+        totValue: totValue
+    })
+}
+
+render() {
+    return super.render();
+}
